@@ -1,5 +1,4 @@
 ﻿#include<iostream>
-#include<unordered_map>
 #include<string_view>
 #include<string>
 #include<vector>
@@ -14,20 +13,31 @@ public:
         int counter = 0;
         auto it = number_digits.rbegin();
         auto end_it = number_digits.rend();
+        bool AllZeros = true;
 
         while (it != end_it) {
             if (counter == 0) {
                 ++counter;
             }
             else {
+                if (AllZeros && counter > 1) {
+                    reversed_res_seq.pop_back();
+                }
+                else {
+                    AllZeros = true;
+                }
                 reversed_res_seq.push_back(regs_[counter]);
                 ++counter;
             }
             for (int i = 0; it != end_it; ++i, ++it) {
                 int digit = *it - '0';
                 if (i == 0) {
+                    if (std::next(it) == end_it && digit == 0) {
+                        reversed_res_seq.push_back(ParseDigit(digit));
+                    }
                     int next_digit = std::next(it) != end_it ? *std::next(it) - '0' : 0;
                     if (next_digit == 1) {
+                        AllZeros = false;
                         reversed_res_seq.push_back(ParseTeens(digit));
                         ++it;
                         ++i;
@@ -37,6 +47,7 @@ public:
                         if (digit == 0) {
                             continue;
                         }
+                        AllZeros = false;
                         reversed_res_seq.push_back(ParseDigit(digit));
                         continue;
                     }
@@ -45,13 +56,16 @@ public:
                     if (digit == 0) {
                         continue;
                     }
+                    AllZeros = false;
                     reversed_res_seq.push_back(ParseTens(digit));
                     continue;
                 }
                 if (i == 2) {
                     if (digit == 0) {
+                        ++it;
                         break;
                     }
+                    AllZeros = false;
                     reversed_res_seq.push_back(regs_[0]);
                     reversed_res_seq.push_back(ParseDigit(digit));
                     ++it;
@@ -74,28 +88,25 @@ public:
     }
 
 private:
-    static inline const std::unordered_map<int, std::string_view> first_digits_{{1, "One"sv}, {2, "Two"sv}, {3, "Three"sv}, {4, "Four"sv}, {5, "Five"sv},
-                                                                                {6, "Six"sv}, {7, "Seven"sv}, {8, "Eight"sv}, {9, "Nine"sv}};
-    static inline const std::unordered_map<int, std::string_view> teens_{{0, "Ten"sv}, {1, "Eleven"sv}, {2, "Twelve"sv}, {3, "Thirteen"sv}, {4, "Fourteen"sv},
-                                                                         {5, "Fifteen"sv}, {6, "Sixteen"sv}, {7, "Seventeen"sv}, {8, "Eighteen"sv}, {9, "Nineteen"sv}};
-    static inline const std::unordered_map<int, std::string_view> tens_{{2, "Twenty"sv}, {3, "Thirty"sv}, {4, "Forty"}, {5, "Fifty"sv}, {6, "Sixty"sv},
-                                                                        {7, "Seventy"sv}, {8, "Eighty"sv}, {9, "Ninety"sv}};
-    static inline const std::string_view regs_[]{{"Hundred"sv}, {"Thousand"sv}, {"Million"sv}, {"Billion"sv}};
+    static inline const char* first_digits_[]{"Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"};
+    static inline const char* teens_[]{"Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"};
+    static inline const char* tens_[]{"", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"};
+    static inline const char* regs_[]{"Hundred", "Thousand", "Million", "Billion"};
 
     std::string_view ParseDigit(int num) {
-        return first_digits_.at(num);
+        return first_digits_[num];
     }
 
     std::string_view ParseTeens(int num) {
-        return teens_.at(num);
+        return teens_[num];
     }
 
     std::string_view ParseTens(int num) {
-        return tens_.at(num);
+        return tens_[num];
     }
 };
 
 int main() {
     Solution s;
-    std::cout << s.numberToWords(1786333155) << '\n';
+    std::cout << s.numberToWords(1000000001) << '\n';
 }
